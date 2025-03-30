@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0a0b1e] text-gray-100 font-rajdhani;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(123, 31, 162, 0.1) 0%, transparent 100%),
+      radial-gradient(circle at 100% 100%, rgba(32, 201, 151, 0.1) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  @keyframes glitch {
+    0% {
+      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                   -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                   -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    14% {
+      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                   -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                   -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    15% {
+      text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                   0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                   -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    49% {
+      text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                   0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                   -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    50% {
+      text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                   0.05em 0 0 rgba(0, 255, 0, 0.75),
+                   0 -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    99% {
+      text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                   0.05em 0 0 rgba(0, 255, 0, 0.75),
+                   0 -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+    100% {
+      text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                   -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                   -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+    }
+  }
+}
+
+@layer components {
+  .arcade-title {
+    @apply font-['Press_Start_2P'] text-white relative;
+    animation: glitch 2s infinite;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+
+  .neon-border {
+    @apply relative border-2 rounded-lg overflow-hidden;
+    background: linear-gradient(45deg, #2C0735, #1B0F2E);
+    box-shadow: 0 0 20px theme('colors.purple.500/30'),
+                inset 0 0 15px theme('colors.purple.500/20');
+    border-image: linear-gradient(45deg, #20C997, #7B1FA2) 1;
+  }
+
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-lg border-2 rounded-lg;
+    border-image: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1)) 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .arcade-button {
+    @apply px-8 py-4 font-['Press_Start_2P'] text-sm relative overflow-hidden
+           transition-all duration-300 transform hover:scale-105 active:scale-95;
+    background: linear-gradient(45deg, #7B1FA2, #20C997);
+    box-shadow: 0 0 15px rgba(123, 31, 162, 0.5),
+                0 0 30px rgba(32, 201, 151, 0.3),
+                inset 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+
+  .arcade-button-sm {
+    @apply px-4 py-2 font-['Press_Start_2P'] text-xs relative overflow-hidden
+           transition-all duration-300 transform hover:scale-105 active:scale-95
+           rounded-lg flex items-center;
+    background: linear-gradient(45deg, #7B1FA2, #20C997);
+    box-shadow: 0 0 10px rgba(123, 31, 162, 0.3),
+                0 0 20px rgba(32, 201, 151, 0.2),
+                inset 0 0 5px rgba(255, 255, 255, 0.1);
+  }
+
+  .arcade-button::before {
+    content: '';
+    @apply absolute inset-0 opacity-30;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  .arcade-button:hover::before {
+    transform: translateX(100%);
+  }
+
+  .credibility-bar {
+    @apply h-4 rounded-full overflow-hidden relative;
+    background: rgba(0,0,0,0.3);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  .credibility-bar-fill {
+    @apply h-full transition-all duration-300;
+    background: linear-gradient(90deg, #20C997, #7B1FA2);
+    box-shadow: 0 0 10px rgba(32, 201, 151, 0.5);
+  }
+
+  .pixel-border {
+    @apply relative p-1;
+    background: linear-gradient(45deg, #7B1FA2, #20C997);
+    clip-path: polygon(
+      0 10px, 10px 0,
+      calc(100% - 10px) 0, 100% 10px,
+      100% calc(100% - 10px), calc(100% - 10px) 100%,
+      10px 100%, 0 calc(100% - 10px)
+    );
+  }
+
+  .live-feed {
+    @apply relative overflow-hidden;
+    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  }
+
+  .scroll-text {
+    animation: scroll 20s linear infinite;
+  }
+
+  .nav-link {
+    @apply flex items-center text-sm font-press-start text-gray-300 
+           hover:text-emerald-400 transition-colors duration-300 relative;
+  }
+
+  .nav-link-underline {
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-400 
+           transition-all duration-300 opacity-0 group-hover:w-full group-hover:opacity-100;
+  }
+
+  .mobile-nav-link {
+    @apply flex items-center text-sm font-press-start text-gray-300 
+           hover:text-emerald-400 transition-colors duration-300
+           px-4 py-3 w-full hover:bg-white/5;
+  }
+
+  @keyframes scroll {
+    0% { transform: translateY(100%); }
+    100% { transform: translateY(-100%); }
+  }
+}
