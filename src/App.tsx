@@ -1,18 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import Debates from "./pages/Debates";
-import Leaderboard from "./pages/Leaderboard";
-import DebateRoom from "./pages/DebateRoom";
-import socket from "./pages/socket";
-
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
+import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Debates from "./pages/Debates";
@@ -21,6 +13,7 @@ import DebateRoom from "./pages/DebateRoom";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import PrivateRoute from "./pages/PrivateRoute"; // ✅ Import PrivateRoute
+import socket from "./pages/socket"; // ✅ Socket import
 
 function App() {
   useEffect(() => {
@@ -29,7 +22,9 @@ function App() {
     socket.on("connect", () => {
       console.log("Connected to server with ID:", socket.id);
     });
-    socket.on("message", (data) => {
+
+    // ✅ Define the type of 'data'
+    socket.on("message", (data: any) => {
       console.log("Received message:", data);
     });
 
@@ -38,6 +33,7 @@ function App() {
       console.log("Disconnected from server with ID:", socket.id);
     };
   }, []);
+
   return (
     <Router>
       <div className="min-h-screen bg-[#0a0b1e] text-gray-100">
