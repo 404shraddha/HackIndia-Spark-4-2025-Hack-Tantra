@@ -1,23 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Timer, MessageSquare, Users, Brain, Award, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import {
+  Timer,
+  MessageSquare,
+  Users,
+  Brain,
+  Award,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 interface Message {
   id: string;
   user: string;
   content: string;
   timestamp: string;
-  type: 'argument' | 'rebuttal' | 'system';
+  type: "argument" | "rebuttal" | "system";
+}
+
+interface User {
+  id: string;
+  name: string;
+  isPro: boolean;
 }
 
 function DebateRoom() {
   const { id } = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
-  const [isTyping, setIsTyping] = useState(false);
-  const [currentTurn, setCurrentTurn] = useState<'pro' | 'con'>('pro');
+  const [currentTurn, setCurrentTurn] = useState<"pro" | "con">("pro");
+
+  // Dummy users
+  const [users, setUsers] = useState<User[]>([
+    { id: "1", name: "Alice", isPro: true },
+    { id: "2", name: "Bob", isPro: false },
+  ]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -30,7 +49,9 @@ function DebateRoom() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,15 +60,15 @@ function DebateRoom() {
 
     const newMessage: Message = {
       id: Date.now().toString(),
-      user: 'You',
+      user: currentTurn === "pro" ? users[0].name : users[1].name,
       content: input,
       timestamp: new Date().toISOString(),
-      type: currentTurn === 'pro' ? 'argument' : 'rebuttal'
+      type: currentTurn === "pro" ? "argument" : "rebuttal",
     };
 
     setMessages([...messages, newMessage]);
-    setInput('');
-    setCurrentTurn(currentTurn === 'pro' ? 'con' : 'pro');
+    setInput("");
+    setCurrentTurn(currentTurn === "pro" ? "con" : "pro");
   };
 
   return (
@@ -60,7 +81,9 @@ function DebateRoom() {
             <div className="container mx-auto flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Timer className="w-5 h-5 text-emerald-400" />
-                <span className="font-press-start text-xl">{formatTime(timeLeft)}</span>
+                <span className="font-press-start text-xl">
+                  {formatTime(timeLeft)}
+                </span>
               </div>
               <div className="flex items-center gap-4">
                 <Users className="w-5 h-5 text-purple-500" />
@@ -78,51 +101,31 @@ function DebateRoom() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex gap-4 ${
-                    message.type === 'system' ? 'justify-center' : 'justify-start'
+                    message.type === "system"
+                      ? "justify-center"
+                      : "justify-start"
                   }`}
                 >
-                  {message.type !== 'system' && (
-                    <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                      {message.type === 'argument' ? (
-                        <MessageSquare className="w-4 h-4 text-purple-400" />
-                      ) : (
-                        <Brain className="w-4 h-4 text-emerald-400" />
-                      )}
-                    </div>
-                  )}
-                  <div className={`flex-1 max-w-2xl ${
-                    message.type === 'system'
-                      ? 'text-center text-gray-400 text-sm'
-                      : 'glass-panel p-4'
-                  }`}>
-                    {message.type !== 'system' && (
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-press-start text-sm">{message.user}</span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(message.timestamp).toLocaleTimeString()}
-                        </span>
-                      </div>
+                  <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    {message.type === "argument" ? (
+                      <MessageSquare className="w-4 h-4 text-purple-400" />
+                    ) : (
+                      <Brain className="w-4 h-4 text-emerald-400" />
                     )}
-                    <p className={message.type === 'system' ? '' : 'text-sm'}>
-                      {message.content}
-                    </p>
+                  </div>
+                  <div className="flex-1 max-w-2xl glass-panel p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-press-start text-sm">
+                        {message.user}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p className="text-sm">{message.content}</p>
                   </div>
                 </motion.div>
               ))}
-              {isTyping && (
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <Brain className="w-4 h-4 text-purple-400" />
-                  </div>
-                  <div className="glass-panel p-4">
-                    <div className="flex gap-2">
-                      <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" />
-                      <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                      <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.4s]" />
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -134,13 +137,12 @@ function DebateRoom() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder={`Your ${currentTurn === 'pro' ? 'argument' : 'rebuttal'}...`}
+                  placeholder={`Your ${
+                    currentTurn === "pro" ? "argument" : "rebuttal"
+                  }...`}
                   className="flex-1 bg-black/30 border border-white/10 rounded px-4 py-2 text-sm"
                 />
-                <button
-                  type="submit"
-                  className="arcade-button-sm"
-                >
+                <button type="submit" className="arcade-button-sm">
                   Send
                 </button>
               </form>
@@ -151,33 +153,32 @@ function DebateRoom() {
         {/* Sidebar */}
         <div className="w-80 bg-black/30 border-l border-white/10 p-4 hidden lg:block">
           <div className="space-y-6">
-            {/* Judge Section */}
+            {/* Participants Section */}
             <div>
               <h3 className="font-press-start text-sm mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4 text-yellow-500" />
-                Judge
+                <Users className="w-4 h-4 text-emerald-400" />
+                Participants
               </h3>
-              <div className="glass-panel p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Brain className="w-4 h-4 text-purple-500" />
-                  <span className="text-sm">AI Judge</span>
-                </div>
-                <div className="h-2 bg-black/30 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-emerald-400"
-                    style={{ width: '60%' }}
-                  />
-                </div>
-                <div className="text-xs text-gray-400 mt-2">
-                  Analyzing arguments...
-                </div>
+              <div className="glass-panel p-4 space-y-2">
+                {users.map((user) => (
+                  <div key={user.id} className="flex items-center gap-2">
+                    <Brain
+                      className={`w-4 h-4 ${
+                        user.isPro ? "text-purple-500" : "text-emerald-400"
+                      }`}
+                    />
+                    <span className="text-sm">
+                      {user.name} {user.isPro ? "(Pro)" : "(Con)"}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Audience Votes */}
             <div>
               <h3 className="font-press-start text-sm mb-4 flex items-center gap-2">
-                <Users className="w-4 h-4 text-emerald-400" />
+                <ThumbsUp className="w-4 h-4 text-emerald-400" />
                 Audience Votes
               </h3>
               <div className="space-y-2">
@@ -186,7 +187,7 @@ function DebateRoom() {
                   <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-emerald-400"
-                      style={{ width: '70%' }}
+                      style={{ width: "70%" }}
                     />
                   </div>
                   <span className="text-sm">70%</span>
@@ -196,7 +197,7 @@ function DebateRoom() {
                   <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-red-400"
-                      style={{ width: '30%' }}
+                      style={{ width: "30%" }}
                     />
                   </div>
                   <span className="text-sm">30%</span>
@@ -214,9 +215,7 @@ function DebateRoom() {
                 <div className="text-2xl font-press-start text-emerald-400 mb-2">
                   2.5 ETH
                 </div>
-                <div className="text-sm text-gray-400">
-                  Total Pool
-                </div>
+                <div className="text-sm text-gray-400">Total Pool</div>
               </div>
             </div>
           </div>

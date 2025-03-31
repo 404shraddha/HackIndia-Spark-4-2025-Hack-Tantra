@@ -25,6 +25,7 @@ const loginController = expressAsyncHandler(async (req, res) => {
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (isMatch) {
+    const token = generateToken(user._id);
     res.status(200).json({
       _id: user._id,
       name: user.name,
