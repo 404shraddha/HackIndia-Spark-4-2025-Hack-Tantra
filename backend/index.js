@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const { default: mongoose } = require("mongoose");
 const userRoutes = require("./routes/userRoutes");
 const debateRoutes = require("./routes/debateRoutes");
@@ -16,6 +17,13 @@ const connectDB = async () => {
     console.log("Server not connected to DB ...", error.message);
   }
 };
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 connectDB();
 app.get("/", (req, res) => {
