@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Users, Timer, Brain, Coins, Plus, Filter } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Users, Timer, Brain, Coins, Plus, Filter } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface DebateRoom {
   id: string;
   topic: string;
   stake: number;
   timeLimit: string;
-  judge: 'AI' | 'Human';
+  judge: "AI" | "Human";
   players: number;
-  status: 'Open' | 'In Progress';
+  status: "Open" | "In Progress";
 }
 
 function Debates() {
@@ -18,29 +18,29 @@ function Debates() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filters, setFilters] = useState({
     minStake: 0,
-    judge: 'all',
-    status: 'all'
+    judge: "all",
+    status: "all",
   });
 
   const debateRooms: DebateRoom[] = [
     {
-      id: '1',
-      topic: 'Should AI systems have rights similar to humans?',
+      id: "1",
+      topic: "Should AI systems have rights similar to humans?",
       stake: 2.5,
-      timeLimit: '30:00',
-      judge: 'AI',
+      timeLimit: "30:00",
+      judge: "AI",
       players: 1,
-      status: 'Open'
+      status: "Open",
     },
     {
-      id: '2',
-      topic: 'Is cryptocurrency the future of global finance?',
+      id: "2",
+      topic: "Is cryptocurrency the future of global finance?",
       stake: 3.8,
-      timeLimit: '45:00',
-      judge: 'Human',
+      timeLimit: "45:00",
+      judge: "Human",
       players: 2,
-      status: 'In Progress'
-    }
+      status: "In Progress",
+    },
   ];
 
   const handleJoinDebate = (id: string) => {
@@ -66,14 +66,12 @@ function Debates() {
             <Filter className="w-4 h-4 text-emerald-400" />
             <span className="text-sm font-press-start">Filters:</span>
           </div>
-          
+
           <select
             className="bg-black/30 border border-white/10 rounded px-3 py-2 text-sm"
             onChange={(e) => setFilters({ ...filters, judge: e.target.value })}
           >
-            <option value="all">All Judges</option>
             <option value="AI">AI Judge</option>
-            <option value="Human">Human Judge</option>
           </select>
 
           <select
@@ -89,7 +87,9 @@ function Debates() {
             type="number"
             placeholder="Min Stake (ETH)"
             className="bg-black/30 border border-white/10 rounded px-3 py-2 text-sm"
-            onChange={(e) => setFilters({ ...filters, minStake: Number(e.target.value) })}
+            onChange={(e) =>
+              setFilters({ ...filters, minStake: Number(e.target.value) })
+            }
           />
         </div>
       </div>
@@ -137,14 +137,16 @@ function Debates() {
               </div>
 
               <div className="flex justify-between items-center">
-                <div className={`px-3 py-1 rounded-full text-sm font-press-start ${
-                  debate.status === "In Progress"
-                    ? "bg-purple-500/20 text-purple-400"
-                    : "bg-emerald-500/20 text-emerald-400"
-                }`}>
+                <div
+                  className={`px-3 py-1 rounded-full text-sm font-press-start ${
+                    debate.status === "In Progress"
+                      ? "bg-purple-500/20 text-purple-400"
+                      : "bg-emerald-500/20 text-emerald-400"
+                  }`}
+                >
                   {debate.status}
                 </div>
-                {debate.status === 'Open' && (
+                {debate.status === "Open" && (
                   <button
                     onClick={() => handleJoinDebate(debate.id)}
                     className="arcade-button-sm"
@@ -168,16 +170,20 @@ function Debates() {
             <h2 className="arcade-title text-xl mb-6">CREATE DEBATE</h2>
             <form className="space-y-4">
               <div>
-                <label className="block text-sm font-press-start mb-2">Topic</label>
+                <label className="block text-sm font-press-start mb-2">
+                  Topic
+                </label>
                 <input
                   type="text"
                   className="w-full bg-black/30 border border-white/10 rounded px-3 py-2"
                   placeholder="Enter debate topic"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-press-start mb-2">Stake (ETH)</label>
+                <label className="block text-sm font-press-start mb-2">
+                  Stake (ETH)
+                </label>
                 <input
                   type="number"
                   step="0.1"
@@ -187,7 +193,9 @@ function Debates() {
               </div>
 
               <div>
-                <label className="block text-sm font-press-start mb-2">Time Limit</label>
+                <label className="block text-sm font-press-start mb-2">
+                  Time Limit
+                </label>
                 <select className="w-full bg-black/30 border border-white/10 rounded px-3 py-2">
                   <option value="15">15 minutes</option>
                   <option value="30">30 minutes</option>
@@ -196,7 +204,9 @@ function Debates() {
               </div>
 
               <div>
-                <label className="block text-sm font-press-start mb-2">Judge Type</label>
+                <label className="block text-sm font-press-start mb-2">
+                  Judge Type
+                </label>
                 <select className="w-full bg-black/30 border border-white/10 rounded px-3 py-2">
                   <option value="AI">AI Judge</option>
                   <option value="Human">Human Judge</option>
@@ -211,10 +221,7 @@ function Debates() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="flex-1 arcade-button-sm"
-                >
+                <button type="submit" className="flex-1 arcade-button-sm">
                   Create
                 </button>
               </div>

@@ -83,7 +83,7 @@ const signupController = expressAsyncHandler(async (req, res) => {
 module.exports = signupController;
 const profileController = async (req, res) => {
   try {
-    console.log("User from Middleware:", req.user); // ✅ Confirm middleware data
+    console.log("User from Middleware:", req.user);
 
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: "Unauthorized access" });
@@ -107,6 +107,7 @@ const profileController = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      coins: user.coins,
       debatesWon,
       debatesLost,
       token: req.headers.authorization.split(" ")[1],

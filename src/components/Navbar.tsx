@@ -1,16 +1,52 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sword, Trophy, LogIn, Menu, X, User, LogOut } from "lucide-react";
+import {
+  Sword,
+  Trophy,
+  LogIn,
+  Menu,
+  X,
+  User,
+  LogOut,
+  Coins,
+} from "lucide-react";
+import axios from "axios"; // ✅ Axios for API call
+
+// Define the User type
+interface User {
+  name: string;
+  coins: number;
+  debatesWon: number;
+  debatesLost: number;
+}
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null); // ✅ Typing the user state
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token); // ✅ Check auth
+    setIsAuthenticated(!!token);
+
+    // ✅ Fetch profile data if authenticated
+    const fetchProfile = async () => {
+      if (token) {
+        try {
+          const res = await axios.get("http://localhost:5100/user/profile", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          setUser(res.data); // ✅ Set user data in state
+        } catch (error) {
+          console.error("Failed to fetch profile:", error);
+        }
+      }
+    };
+
+    fetchProfile();
   }, [location]);
 
   const toggleMenu = () => {
@@ -32,12 +68,10 @@ function Navbar() {
             <Link to="/" className="nav-link group">
               Home
             </Link>
-
             <Link to="/debates" className="nav-link group">
               <Sword className="w-4 h-4 mr-2" />
               <span>Debates</span>
             </Link>
-
             <Link to="/leaderboard" className="nav-link group">
               <Trophy className="w-4 h-4 mr-2" />
               <span>Leaderboard</span>
@@ -48,6 +82,23 @@ function Navbar() {
           <div className="hidden md:flex items-center space-x-6">
             {isAuthenticated ? (
               <>
+                {/* ✅ Display profile data */}
+                {user && (
+                  <div className="flex items-center space-x-4 text-white">
+                    <span className="flex items-center">
+                      <User className="w-4 h-4 mr-1" />
+                      {user.name}
+                    </span>
+                    <span className="flex items-center">
+                      <Coins className="w-4 h-4 mr-1" />
+                      {user.coins} Coins
+                    </span>
+                    <span className="flex items-center">
+                      🏆 {user.debatesWon} Wins / ❌ {user.debatesLost} Losses
+                    </span>
+                  </div>
+                )}
+
                 <Link
                   to="/profile"
                   className="arcade-button-sm flex items-center"
