@@ -1,14 +1,12 @@
-<<<<<<< HEAD
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Debates from './pages/Debates';
-import Leaderboard from './pages/Leaderboard';
-import DebateRoom from './pages/DebateRoom';
-import socket from './pages/socket';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Debates from "./pages/Debates";
+import Leaderboard from "./pages/Leaderboard";
+import DebateRoom from "./pages/DebateRoom";
+import socket from "./pages/socket";
 
-=======
 import {
   BrowserRouter as Router,
   Routes,
@@ -23,7 +21,6 @@ import DebateRoom from "./pages/DebateRoom";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import PrivateRoute from "./pages/PrivateRoute"; // ✅ Import PrivateRoute
->>>>>>> b0b10c1a333318df150a960bea8eb846faafa83b
 
 function App() {
   useEffect(() => {
