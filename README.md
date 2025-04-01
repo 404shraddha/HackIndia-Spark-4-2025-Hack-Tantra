@@ -7,7 +7,8 @@ People argue online all the time—on Twitter, Instagram, and forums—whether i
 
 ## Project
 **Debatrix** is a skill-based argument game where users engage in structured debates, stake tokens, and win rewards based on AI-judged outcomes. It brings structure, fairness, and incentives to online arguments, making debates more engaging and competitive.
-Here's the short glmips of the website : 
+
+Here's the short glimpse of the website : 
 ![Image](https://github.com/user-attachments/assets/a4b180f3-df00-48e8-9313-612c001d005e)
 ![Image](https://github.com/user-attachments/assets/7b3df8d6-1c90-4053-b7a2-1204e3855c59)
 ![Image](https://github.com/user-attachments/assets/43be12e3-0bdf-4785-8ee9-0afb48c6dbb2)
