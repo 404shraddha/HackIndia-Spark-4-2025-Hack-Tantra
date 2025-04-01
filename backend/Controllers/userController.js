@@ -13,7 +13,6 @@ const loginController = expressAsyncHandler(async (req, res) => {
     return;
   }
 
-  //  Query the correct field name (case-sensitive)
   const user = await UserModel.findOne({ name });
 
   if (!user) {
@@ -21,16 +20,15 @@ const loginController = expressAsyncHandler(async (req, res) => {
     return;
   }
 
-  //  Compare hashed password with plaintext password
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (isMatch) {
-    const token = generateToken(user._id);
+    const token = generateToken(user._id); // Generate a JWT token
     res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id),
+      token, // Include token in the response
     });
   } else {
     res.status(401).json({ message: "Invalid username or password" });
@@ -58,14 +56,13 @@ const signupController = expressAsyncHandler(async (req, res) => {
     return;
   }
 
-  //  Hash the password before saving
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
   const newUser = await UserModel.create({
     name,
     email,
-    password: hashedPassword, //  Store hashed password
+    password: hashedPassword, // Store hashed password
   });
 
   if (newUser) {
@@ -73,7 +70,7 @@ const signupController = expressAsyncHandler(async (req, res) => {
       _id: newUser._id,
       name: newUser.name,
       email: newUser.email,
-      token: generateToken(newUser._id),
+      token: generateToken(newUser._id), // Generate and return token
     });
   } else {
     res.status(400).json({ message: "Registration failed" });
@@ -83,8 +80,6 @@ const signupController = expressAsyncHandler(async (req, res) => {
 module.exports = signupController;
 const profileController = async (req, res) => {
   try {
-    console.log("User from Middleware:", req.user);
-
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: "Unauthorized access" });
     }
@@ -107,7 +102,6 @@ const profileController = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-
       debatesWon,
       debatesLost,
       token: req.headers.authorization.split(" ")[1],

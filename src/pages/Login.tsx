@@ -21,18 +21,14 @@ function Login() {
 
       alert("✅ Login Successful!");
 
-      // ✅ Use setTimeout to avoid flashing the login page
-      setTimeout(() => {
-        navigate("/");
-      }, 1000); // 1 second delay to prevent flickering
+      setTimeout(() => navigate("/"), 1000); // Redirect after 1 second
     } catch (error) {
       console.error("❌ Login failed:", error);
-
-      if (axios.isAxiosError(error)) {
-        alert(error.response?.data?.message || "Login failed!");
-      } else {
-        alert("Server error. Please try again!");
-      }
+      alert(
+        axios.isAxiosError(error)
+          ? error.response?.data?.message
+          : "Server error. Please try again!"
+      );
     }
   };
 

@@ -1,10 +1,10 @@
+import { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Debates from "./pages/Debates";
@@ -12,39 +12,48 @@ import Leaderboard from "./pages/Leaderboard";
 import DebateRoom from "./pages/DebateRoom";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
-import PrivateRoute from "./pages/PrivateRoute"; // ✅ Import PrivateRoute
-import socket from "./pages/socket"; // ✅ Socket import
+import PrivateRoute from "./pages/PrivateRoute";
+import socket from "./pages/socket"; // Import the socket client
 
-function App() {
+const App = () => {
   useEffect(() => {
+    // Establish the socket connection when the component mounts
     socket.connect();
 
+    // Handle successful connection event
     socket.on("connect", () => {
       console.log("Connected to server with ID:", socket.id);
     });
 
-    // ✅ Define the type of 'data'
+    // Handle socket connection errors
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err);
+    });
+
+    // Listen for incoming messages
     socket.on("message", (data: any) => {
       console.log("Received message:", data);
     });
 
+    // Cleanup: Disconnect from the socket server when the component unmounts
     return () => {
-      socket.disconnect();
-      console.log("Disconnected from server with ID:", socket.id);
+      if (socket.connected) {
+        socket.disconnect();
+        console.log("Disconnected from server with ID:", socket.id);
+      }
     };
-  }, []);
+  }, []); // Empty dependency array ensures this runs once when the component mounts
 
   return (
     <Router>
       <div className="min-h-screen bg-[#0a0b1e] text-gray-100">
-        <Navbar />
-
+        <Navbar /> {/* Navbar component */}
         <Routes>
-          {/* ✅ Public Routes */}
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* 🔥 Private Routes (Protected by PrivateRoute) */}
+          {/* Private Routes (Protected by PrivateRoute) */}
           <Route
             path="/"
             element={
@@ -78,12 +87,12 @@ function App() {
             }
           />
 
-          {/* ✅ Catch-All Route */}
+          {/* Catch-All Route (Redirects to Home if URL doesn't match any route) */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
     </Router>
   );
-}
+};
 
 export default App;
