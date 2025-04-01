@@ -209,7 +209,6 @@ function Debates() {
                 </label>
                 <select className="w-full bg-black/30 border border-white/10 rounded px-3 py-2">
                   <option value="AI">AI Judge</option>
-                  <option value="Human">Human Judge</option>
                 </select>
               </div>
 

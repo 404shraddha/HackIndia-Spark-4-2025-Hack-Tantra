@@ -107,7 +107,7 @@ const profileController = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      coins: user.coins,
+
       debatesWon,
       debatesLost,
       token: req.headers.authorization.split(" ")[1],
