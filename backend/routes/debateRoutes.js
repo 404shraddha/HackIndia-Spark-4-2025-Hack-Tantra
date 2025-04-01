@@ -10,7 +10,7 @@ const Router = express.Router();
 
 // 👇 Routes with middleware
 Router.post("/create", authMiddleware, createController);
-Router.get("/:id", authMiddleware, specificDebateController);
-Router.get("/", authMiddleware, allDebatesController);
+Router.get("/:id", specificDebateController);
+Router.get("/", allDebatesController);
 
 module.exports = Router;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import io from "socket.io-client"; // Import socket.io-client
 import {
   Timer,
   MessageSquare,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 
+// Message and User interfaces (same as before)
 interface Message {
   id: string;
   user: string;
@@ -31,14 +33,73 @@ function DebateRoom() {
   const [input, setInput] = useState("");
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
   const [currentTurn, setCurrentTurn] = useState<"pro" | "con">("pro");
-
-  // Dummy users
-  const [users, setUsers] = useState<User[]>([
-    { id: "1", name: "Alice", isPro: true },
-    { id: "2", name: "Bob", isPro: false },
-  ]);
+  const [users, setUsers] = useState<User[]>([]); // Dynamic users
+  const [socket, setSocket] = useState<any>(null); // State for socket connection
 
   useEffect(() => {
+    // Fetch messages from localStorage if available
+    const storedMessages = localStorage.getItem("messages");
+    if (storedMessages) {
+      setMessages(JSON.parse(storedMessages));
+    }
+
+    // Establish socket connection when the component mounts
+    const socketConnection = io("http://localhost:5173"); // Connect to your server
+
+    // Listen for messages and users from the server
+    socketConnection.on("message", (message: string) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: Date.now().toString(),
+          user: "System",
+          content: message,
+          timestamp: new Date().toISOString(),
+          type: "system",
+        },
+      ]);
+    });
+
+    socketConnection.on(
+      "receive_message",
+      (data: { message: string; sender: string }) => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: Date.now().toString(),
+            user: data.sender,
+            content: data.message,
+            timestamp: new Date().toISOString(),
+            type: "argument",
+          },
+        ]);
+      }
+    );
+
+    // Set the socket connection state
+    setSocket(socketConnection);
+
+    // Cleanup the socket connection on unmount
+    return () => {
+      socketConnection.disconnect(); // Disconnect the socket when the component unmounts
+    };
+  }, []); // Empty dependency array ensures this runs once on mount
+
+  useEffect(() => {
+    // Simulate fetching logged-in user data (replace with actual authentication logic)
+    const fetchUsers = async () => {
+      // Example: Assume this comes from an authenticated session or an API call
+      const loggedInUsers = [
+        { id: "1", name: "Alice", isPro: true },
+        { id: "2", name: "Bob", isPro: false },
+      ];
+      console.log(loggedInUsers);
+      setUsers(loggedInUsers); // Set users dynamically
+    };
+
+    fetchUsers(); // Fetch logged-in users
+
+    // Timer logic to count down the debate time
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
@@ -66,13 +127,53 @@ function DebateRoom() {
       type: currentTurn === "pro" ? "argument" : "rebuttal",
     };
 
-    setMessages([...messages, newMessage]);
+    // Add the new message to the state
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages, newMessage];
+
+      // Save messages to localStorage
+      localStorage.setItem("messages", JSON.stringify(updatedMessages));
+
+      return updatedMessages; // Return the updated array to set state
+    });
+
     setInput("");
     setCurrentTurn(currentTurn === "pro" ? "con" : "pro");
+
+    // Emit the message to the room via socket
+    if (socket) {
+      socket.emit("send_message", { room: id, message: input });
+    }
+  };
+
+  const handleJoinDebate = () => {
+    if (socket) {
+      socket.emit("join_debate", id); // Join the specific debate room
+      console.log(`Joined debate room: ${id}`);
+    }
+  };
+
+  const handleClearMessages = () => {
+    setMessages([]); // Clear the messages in state
+    localStorage.removeItem("messages"); // Remove messages from localStorage
   };
 
   return (
     <div className="pt-16 min-h-screen flex flex-col">
+      {/* Add the button to join debate */}
+      <button onClick={handleJoinDebate} className="arcade-button-lg mb-4">
+        Join Debate
+      </button>
+
+      <div className="flex justify-center">
+        <button
+          onClick={handleClearMessages}
+          className="px-3 py-1 text-xs arcade-button-sm mb-2 w-24"
+        >
+          Clear
+        </button>
+      </div>
+
       <div className="flex-1 flex">
         {/* Main Debate Area */}
         <div className="flex-1 flex flex-col">
@@ -178,44 +279,18 @@ function DebateRoom() {
             {/* Audience Votes */}
             <div>
               <h3 className="font-press-start text-sm mb-4 flex items-center gap-2">
-                <ThumbsUp className="w-4 h-4 text-emerald-400" />
+                <Award className="w-4 h-4 text-purple-500" />
                 Audience Votes
               </h3>
-              <div className="space-y-2">
+              <div className="glass-panel p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <ThumbsUp className="w-4 h-4 text-emerald-400" />
-                  <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-400"
-                      style={{ width: "70%" }}
-                    />
-                  </div>
-                  <span className="text-sm">70%</span>
+                  <ThumbsUp className="w-5 h-5 text-emerald-500" />
+                  <span className="text-sm">100</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ThumbsDown className="w-4 h-4 text-red-400" />
-                  <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-red-400"
-                      style={{ width: "30%" }}
-                    />
-                  </div>
-                  <span className="text-sm">30%</span>
+                  <ThumbsDown className="w-5 h-5 text-red-500" />
+                  <span className="text-sm">25</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Stakes */}
-            <div>
-              <h3 className="font-press-start text-sm mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4 text-yellow-500" />
-                Stakes
-              </h3>
-              <div className="glass-panel p-4">
-                <div className="text-2xl font-press-start text-emerald-400 mb-2">
-                  2.5 ETH
-                </div>
-                <div className="text-sm text-gray-400">Total Pool</div>
               </div>
             </div>
           </div>

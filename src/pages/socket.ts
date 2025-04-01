@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const SOCKET_SERVER_URL = "http://localhost:5173"; // Ensure this matches your backend
+const SOCKET_SERVER_URL = "http://localhost:5100"; // Corrected to backend port
 
 const socket = io(SOCKET_SERVER_URL, {
   autoConnect: false, // Prevent auto-connection

@@ -23,6 +23,11 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded; // Use full decoded payload
     console.log("User Set in Req:", req.user); // ✅ Confirm it
 
+    // Check if token has expired
+    if (decoded.exp < Date.now() / 1000) {
+      return res.status(401).json({ message: "Token has expired" });
+    }
+
     next();
   } catch (error) {
     console.error("JWT Verification Error:", error);
