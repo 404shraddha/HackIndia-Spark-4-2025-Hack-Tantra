@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  console.log("Auth Header:", authHeader); // Debug token reception
+  console.log("Auth Header:", authHeader);
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Unauthorized access" });
@@ -17,13 +17,11 @@ const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded Token:", decoded); // ✅ Debug token payload
+    console.log("Decoded Token:", decoded);
 
-    // 👇 Ensure user object is attached to req
-    req.user = decoded; // Use full decoded payload
-    console.log("User Set in Req:", req.user); // ✅ Confirm it
+    req.user = decoded;
+    console.log("User Set in Req:", req.user);
 
-    // Check if token has expired
     if (decoded.exp < Date.now() / 1000) {
       return res.status(401).json({ message: "Token has expired" });
     }

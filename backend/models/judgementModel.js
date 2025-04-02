@@ -1,20 +1,19 @@
 const mongoose = require("mongoose");
 const judgementModel = mongoose.Schema({
   _id: ObjectId,
-  debateId: ObjectId, // Reference to the Debate
+  debateId: ObjectId,
   argumentsAnalysis: [
-    // Analysis for both participants
     {
       participantId: ObjectId,
-      coherenceScore: Number, // AI score for logical coherence
-      factualScore: Number, // AI fact-checking score
-      rhetoricalScore: Number, // AI persuasion score
-      overallScore: Number, // Weighted average
+      coherenceScore: Number,
+      factualScore: Number,
+      rhetoricalScore: Number,
+      overallScore: Number,
     },
   ],
-  verdict: String, // Winner ID or draw
-  finalDecision: String, // AI’s explanation
-  recordedOnChain: Boolean, // Whether saved on-chain
+  verdict: String,
+  finalDecision: String,
+  recordedOnChain: Boolean,
   createdAt: Date,
   updatedAt: Date,
 });

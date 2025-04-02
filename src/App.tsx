@@ -13,47 +13,40 @@ import DebateRoom from "./pages/DebateRoom";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import PrivateRoute from "./pages/PrivateRoute";
-import socket from "./pages/socket"; // Import the socket client
+import socket from "./pages/socket";
 
 const App = () => {
   useEffect(() => {
-    // Establish the socket connection when the component mounts
     socket.connect();
 
-    // Handle successful connection event
     socket.on("connect", () => {
       console.log("Connected to server with ID:", socket.id);
     });
 
-    // Handle socket connection errors
     socket.on("connect_error", (err) => {
       console.error("Socket connection error:", err);
     });
 
-    // Listen for incoming messages
     socket.on("message", (data: any) => {
       console.log("Received message:", data);
     });
 
-    // Cleanup: Disconnect from the socket server when the component unmounts
     return () => {
       if (socket.connected) {
         socket.disconnect();
         console.log("Disconnected from server with ID:", socket.id);
       }
     };
-  }, []); // Empty dependency array ensures this runs once when the component mounts
+  }, []);
 
   return (
     <Router>
       <div className="min-h-screen bg-[#0a0b1e] text-gray-100">
-        <Navbar /> {/* Navbar component */}
+        <Navbar />
         <Routes>
-          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* Private Routes (Protected by PrivateRoute) */}
           <Route
             path="/"
             element={
@@ -87,7 +80,6 @@ const App = () => {
             }
           />
 
-          {/* Catch-All Route (Redirects to Home if URL doesn't match any route) */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

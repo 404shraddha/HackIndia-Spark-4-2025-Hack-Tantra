@@ -20,10 +20,11 @@
     "ethers": "^6.13.5",
     "express": "^4.21.2",
     "framer-motion": "^11.0.8",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.0",
+    "react-router-dom": "^7.4.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "web3": "^4.5.0"

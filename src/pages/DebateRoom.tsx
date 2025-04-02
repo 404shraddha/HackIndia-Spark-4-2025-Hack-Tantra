@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import io from "socket.io-client"; // Import socket.io-client
-import {
-  Timer,
-  MessageSquare,
-  Users,
-  Brain,
-  Award,
-  ThumbsUp,
-  ThumbsDown,
-} from "lucide-react";
+import io, { Socket } from "socket.io-client";
+import { jwtDecode } from "jwt-decode";
+import { Timer, MessageSquare, Users } from "lucide-react";
 import { motion } from "framer-motion";
 
-// Message and User interfaces (same as before)
 interface Message {
   id: string;
   user: string;
@@ -21,44 +13,29 @@ interface Message {
   type: "argument" | "rebuttal" | "system";
 }
 
-interface User {
-  id: string;
-  name: string;
-  isPro: boolean;
-}
-
-function DebateRoom() {
-  const { id } = useParams();
+const DebateRoom: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
+  const [input, setInput] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<number>(3000);
   const [currentTurn, setCurrentTurn] = useState<"pro" | "con">("pro");
-  const [users, setUsers] = useState<User[]>([]); // Dynamic users
-  const [socket, setSocket] = useState<any>(null); // State for socket connection
+  const [username, setUsername] = useState<string>("");
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [judgmentResult, setJudgmentResult] = useState<string>("");
 
   useEffect(() => {
-    // Fetch messages from localStorage if available
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      setUsername(decoded.name);
+    }
+
     const storedMessages = localStorage.getItem("messages");
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
 
-    // Establish socket connection when the component mounts
-    const socketConnection = io("http://localhost:5173"); // Connect to your server
-
-    // Listen for messages and users from the server
-    socketConnection.on("message", (message: string) => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          id: Date.now().toString(),
-          user: "System",
-          content: message,
-          timestamp: new Date().toISOString(),
-          type: "system",
-        },
-      ]);
-    });
+    const socketConnection = io("http://localhost:5173");
 
     socketConnection.on(
       "receive_message",
@@ -76,44 +53,19 @@ function DebateRoom() {
       }
     );
 
-    // Set the socket connection state
     setSocket(socketConnection);
 
-    // Cleanup the socket connection on unmount
     return () => {
-      socketConnection.disconnect(); // Disconnect the socket when the component unmounts
+      socketConnection.disconnect();
     };
-  }, []); // Empty dependency array ensures this runs once on mount
+  }, []);
 
   useEffect(() => {
-    // Simulate fetching logged-in user data (replace with actual authentication logic)
-    const fetchUsers = async () => {
-      // Example: Assume this comes from an authenticated session or an API call
-      const loggedInUsers = [
-        { id: "1", name: "Alice", isPro: true },
-        { id: "2", name: "Bob", isPro: false },
-      ];
-      console.log(loggedInUsers);
-      setUsers(loggedInUsers); // Set users dynamically
-    };
-
-    fetchUsers(); // Fetch logged-in users
-
-    // Timer logic to count down the debate time
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,98 +73,77 @@ function DebateRoom() {
 
     const newMessage: Message = {
       id: Date.now().toString(),
-      user: currentTurn === "pro" ? users[0].name : users[1].name,
+      user: username,
       content: input,
       timestamp: new Date().toISOString(),
       type: currentTurn === "pro" ? "argument" : "rebuttal",
     };
 
-    // Add the new message to the state
     setMessages((prevMessages) => {
       const updatedMessages = [...prevMessages, newMessage];
-
-      // Save messages to localStorage
       localStorage.setItem("messages", JSON.stringify(updatedMessages));
-
-      return updatedMessages; // Return the updated array to set state
+      return updatedMessages;
     });
 
     setInput("");
     setCurrentTurn(currentTurn === "pro" ? "con" : "pro");
 
-    // Emit the message to the room via socket
     if (socket) {
-      socket.emit("send_message", { room: id, message: input });
+      socket.emit("send_message", {
+        room: id,
+        message: input,
+        sender: username,
+      });
     }
   };
 
-  const handleJoinDebate = () => {
-    if (socket) {
-      socket.emit("join_debate", id); // Join the specific debate room
-      console.log(`Joined debate room: ${id}`);
-    }
-  };
+  const handleJudge = async () => {
+    try {
+      const response = await fetch("http://localhost:5173/judgment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          roomId: id,
+        }),
+      });
 
-  const handleClearMessages = () => {
-    setMessages([]); // Clear the messages in state
-    localStorage.removeItem("messages"); // Remove messages from localStorage
+      if (!response.ok) {
+        throw new Error("Judgment failed");
+      }
+
+      const data = await response.json();
+      setJudgmentResult(data.result);
+    } catch (error) {
+      console.error("Error during judgment:", error);
+      setJudgmentResult("Error judging the debate.");
+    }
   };
 
   return (
     <div className="pt-16 min-h-screen flex flex-col">
-      {/* Add the button to join debate */}
-      <button onClick={handleJoinDebate} className="arcade-button-lg mb-4">
-        Join Debate
-      </button>
-
-      <div className="flex justify-center">
-        <button
-          onClick={handleClearMessages}
-          className="px-3 py-1 text-xs arcade-button-sm mb-2 w-24"
-        >
-          Clear
-        </button>
-      </div>
-
       <div className="flex-1 flex">
-        {/* Main Debate Area */}
         <div className="flex-1 flex flex-col">
-          {/* Debate Info Header */}
           <div className="bg-black/30 p-4 border-b border-white/10">
             <div className="container mx-auto flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Timer className="w-5 h-5 text-emerald-400" />
-                <span className="font-press-start text-xl">
-                  {formatTime(timeLeft)}
-                </span>
+                <span className="font-press-start text-xl">{timeLeft}</span>
               </div>
               <div className="flex items-center gap-4">
                 <Users className="w-5 h-5 text-purple-500" />
-                <span className="font-press-start">2/2</span>
+                <span className="font-press-start">{username}</span>
               </div>
             </div>
           </div>
 
-          {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4">
             <div className="container mx-auto space-y-4">
               {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-4 ${
-                    message.type === "system"
-                      ? "justify-center"
-                      : "justify-start"
-                  }`}
-                >
+                <motion.div key={message.id} className="flex gap-4">
                   <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    {message.type === "argument" ? (
-                      <MessageSquare className="w-4 h-4 text-purple-400" />
-                    ) : (
-                      <Brain className="w-4 h-4 text-emerald-400" />
-                    )}
+                    <MessageSquare className="w-4 h-4 text-purple-400" />
                   </div>
                   <div className="flex-1 max-w-2xl glass-panel p-4">
                     <div className="flex justify-between items-center mb-2">
@@ -230,7 +161,6 @@ function DebateRoom() {
             </div>
           </div>
 
-          {/* Input Area */}
           <div className="bg-black/30 border-t border-white/10 p-4">
             <div className="container mx-auto">
               <form onSubmit={handleSubmit} className="flex gap-4">
@@ -243,61 +173,32 @@ function DebateRoom() {
                   }...`}
                   className="flex-1 bg-black/30 border border-white/10 rounded px-4 py-2 text-sm"
                 />
+                <button
+                  type="button"
+                  className="arcade-button-sm"
+                  onClick={handleJudge}
+                >
+                  Judge
+                </button>
                 <button type="submit" className="arcade-button-sm">
                   Send
                 </button>
               </form>
             </div>
           </div>
-        </div>
 
-        {/* Sidebar */}
-        <div className="w-80 bg-black/30 border-l border-white/10 p-4 hidden lg:block">
-          <div className="space-y-6">
-            {/* Participants Section */}
-            <div>
-              <h3 className="font-press-start text-sm mb-4 flex items-center gap-2">
-                <Users className="w-4 h-4 text-emerald-400" />
-                Participants
-              </h3>
-              <div className="glass-panel p-4 space-y-2">
-                {users.map((user) => (
-                  <div key={user.id} className="flex items-center gap-2">
-                    <Brain
-                      className={`w-4 h-4 ${
-                        user.isPro ? "text-purple-500" : "text-emerald-400"
-                      }`}
-                    />
-                    <span className="text-sm">
-                      {user.name} {user.isPro ? "(Pro)" : "(Con)"}
-                    </span>
-                  </div>
-                ))}
+          {judgmentResult && (
+            <div className="bg-black/30 p-4 mt-4">
+              <div className="container mx-auto">
+                <h3 className="text-lg text-white">Judgment Result</h3>
+                <p className="text-sm text-gray-300">{judgmentResult}</p>
               </div>
             </div>
-
-            {/* Audience Votes */}
-            <div>
-              <h3 className="font-press-start text-sm mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4 text-purple-500" />
-                Audience Votes
-              </h3>
-              <div className="glass-panel p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <ThumbsUp className="w-5 h-5 text-emerald-500" />
-                  <span className="text-sm">100</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ThumbsDown className="w-5 h-5 text-red-500" />
-                  <span className="text-sm">25</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default DebateRoom;

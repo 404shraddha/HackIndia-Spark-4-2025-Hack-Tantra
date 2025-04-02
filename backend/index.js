@@ -9,33 +9,30 @@ const debateRoutes = require("./routes/debateRoutes");
 const judgementRoutes = require("./routes/judgementRoutes");
 const rewardsRoutes = require("./routes/rewardsRoute");
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app); // HTTP server for WebSocket
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Allow frontend
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
     methods: ["GET", "POST"],
   },
 });
 
-// Database connection
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("✅ Server connected to MongoDB...");
+    console.log(" Server connected to MongoDB...");
   } catch (error) {
-    console.error("❌ Server failed to connect to MongoDB:", error.message);
-    process.exit(1); // Exit process on DB failure
+    console.error("Server failed to connect to MongoDB:", error.message);
+    process.exit(1);
   }
 };
 
-// Enable CORS
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -44,16 +41,12 @@ app.use(
   })
 );
 
-// Middleware
 app.use(express.json());
-
-// Connect to DB
 connectDB();
 
-// Routes
 app.get("/", (req, res) => {
-  console.log("✅ API is running...");
-  res.send("🚀 API is running successfully!");
+  console.log(" API is running...");
+  res.send("API is running successfully...");
 });
 
 app.use("/user", userRoutes);
@@ -61,43 +54,69 @@ app.use("/debate", debateRoutes);
 app.use("/judgement", judgementRoutes);
 app.use("/rewards", rewardsRoutes);
 
-// WebSocket connection
+const debateRooms = {};
+
 io.on("connection", (socket) => {
-  console.log(`🔵 A user connected: ${socket.id}`);
+  console.log(` A user connected: ${socket.id}`);
 
-  // Handling user joining a debate room
-  socket.on("join_debate", (roomId) => {
-    const room = io.sockets.adapter.rooms.get(roomId); // Get room details
-    const numUsers = room ? room.size : 0; // Count users in room
+  socket.on("join_debate", ({ roomId, username }) => {
+    if (!debateRooms[roomId]) {
+      debateRooms[roomId] = [];
+    }
 
-    if (numUsers < 2) {
-      socket.join(roomId); // Join the room
-      console.log(`User ${socket.id} joined debate room: ${roomId}`);
-      io.to(roomId).emit("room_update", { message: "A new user has joined!" });
+    const usersInRoom = debateRooms[roomId];
+
+    if (usersInRoom.length < 2) {
+      usersInRoom.push({ id: socket.id, name: username });
+      socket.join(roomId);
+      console.log(` ${username} (${socket.id}) joined room ${roomId}`);
+
+      io.to(roomId).emit("room_update", {
+        message: `${username} has joined!`,
+        users: usersInRoom.map((user) => user.name),
+      });
     } else {
       socket.emit("room_full", { message: "Room is already full!" });
-      console.log(`❌ User ${socket.id} denied entry to full room: ${roomId}`);
+      console.log(` ${username} denied entry to full room: ${roomId}`);
     }
   });
 
-  // Handling message send event
-  socket.on("send_message", (data) => {
-    console.log(`📩 Message received for room ${data.room}: ${data.message}`);
-    io.to(data.room).emit("receive_message", {
-      message: data.message,
-      sender: data.sender,
-    }); // Send message to users in the specific room
+  socket.on("send_message", ({ room, message, sender }) => {
+    const usersInRoom = debateRooms[room] || [];
+    const isUserInRoom = usersInRoom.some((user) => user.id === socket.id);
+
+    if (isUserInRoom) {
+      console.log(` ${sender}: ${message} in room ${room}`);
+      io.to(room).emit("receive_message", { message, sender });
+    } else {
+      socket.emit("not_allowed", {
+        message: "You are not in this debate room!",
+      });
+    }
   });
 
-  // Handling user disconnection
   socket.on("disconnect", () => {
-    console.log(`🔴 A user disconnected: ${socket.id}`);
-    io.emit("user-disconnected", { id: socket.id });
+    console.log(` User disconnected: ${socket.id}`);
+
+    for (const roomId in debateRooms) {
+      const usersInRoom = debateRooms[roomId];
+      const index = usersInRoom.findIndex((user) => user.id === socket.id);
+
+      if (index !== -1) {
+        const disconnectedUser = usersInRoom.splice(index, 1)[0];
+        io.to(roomId).emit("room_update", {
+          message: `${disconnectedUser.name} has left the debate.`,
+          users: usersInRoom.map((user) => user.name),
+        });
+
+        if (usersInRoom.length === 0) {
+          delete debateRooms[roomId];
+        }
+        break;
+      }
+    }
   });
 });
 
-// Start server
 const PORT = process.env.PORT || 5100;
-server.listen(PORT, () =>
-  console.log(`🚀 Server is running on port ${PORT}...`)
-);
+server.listen(PORT, () => console.log(` Server is running on port ${PORT}...`));

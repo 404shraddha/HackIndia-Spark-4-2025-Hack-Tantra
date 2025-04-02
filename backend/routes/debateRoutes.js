@@ -8,7 +8,6 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 const Router = express.Router();
 
-// 👇 Routes with middleware
 Router.post("/create", authMiddleware, createController);
 Router.get("/:id", specificDebateController);
 Router.get("/", allDebatesController);

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios"; // ✅ Axios for API call
+import axios from "axios";
 
-// Define the User type
 interface User {
   name: string;
   coins: number;
@@ -10,7 +9,7 @@ interface User {
 }
 
 function Profile() {
-  const [user, setUser] = useState<User | null>(null); // ✅ User type
+  const [user, setUser] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<User>({
     name: "",
@@ -28,7 +27,7 @@ function Profile() {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(res.data);
-          setFormData(res.data); // Initialize formData with user data
+          setFormData(res.data);
         } catch (error) {
           console.error("Failed to fetch profile:", error);
         }
@@ -54,8 +53,8 @@ function Profile() {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          setUser(response.data); // Update user data after saving
-          setIsEditing(false); // Stop editing after saving
+          setUser(response.data);
+          setIsEditing(false);
         })
         .catch((error) => {
           console.error("Failed to update profile:", error);

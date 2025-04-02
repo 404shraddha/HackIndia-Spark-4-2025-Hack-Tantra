@@ -8,7 +8,6 @@ function Signup() {
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
 
-  // 🛠️ Signup function with proper typing
   const handleSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -21,7 +20,7 @@ function Signup() {
 
       console.log("Response:", res.data);
       alert("✅ Signup Successful!");
-      navigate("/login"); // Signup ke baad login page par le jao
+      navigate("/login");
     } catch (error) {
       console.error("❌ Signup failed:", error);
 
@@ -37,11 +36,10 @@ function Signup() {
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <form
         onSubmit={handleSignup}
-        className="bg-black p-8 rounded-lg shadow-lg w-96 text-white" // 👈 bg-black + text-white
+        className="bg-black p-8 rounded-lg shadow-lg w-96 text-white"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
 
-        {/* Name Field */}
         <input
           type="text"
           placeholder="Name"
@@ -51,7 +49,6 @@ function Signup() {
           required
         />
 
-        {/* Email Field */}
         <input
           type="email"
           placeholder="Email"
@@ -61,7 +58,6 @@ function Signup() {
           required
         />
 
-        {/* Password Field */}
         <input
           type="password"
           placeholder="Password"
@@ -71,7 +67,6 @@ function Signup() {
           required
         />
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-emerald-500 text-white py-2 rounded-lg hover:bg-emerald-600 transition"

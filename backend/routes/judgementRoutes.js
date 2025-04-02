@@ -3,7 +3,6 @@ const {
   analyzeController,
   judgementidController,
 } = require("../Controllers/judgementController");
-const authMiddleware = require("../middlewares/authMiddleware");
 
 const Router = express.Router();
 Router.post("/analyze", analyzeController);

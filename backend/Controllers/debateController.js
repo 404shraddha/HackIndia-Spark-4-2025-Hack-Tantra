@@ -1,7 +1,5 @@
 const Debate = require("../models/debateModel");
-const authMiddleware = require("../middlewares/authMiddleware");
 
-//  POST: Naya debate create karne ka controller
 const createController = async (req, res) => {
   try {
     const { topic, participant1, participant2, stakeAmount } = req.body;
@@ -11,7 +9,7 @@ const createController = async (req, res) => {
       participant1,
       participant2,
       stakeAmount,
-      winner: null, // Initially null
+      winner: null,
       aiDecision: "",
       resultOnChain: false,
     });
@@ -24,7 +22,6 @@ const createController = async (req, res) => {
   }
 };
 
-//  GET: Specific debate dekhne ka controller
 const specificDebateController = async (req, res) => {
   try {
     const debate = await Debate.findById(req.params.id);
@@ -40,7 +37,6 @@ const specificDebateController = async (req, res) => {
   }
 };
 
-//  GET: Saare debates dekhne ka controller
 const allDebatesController = async (req, res) => {
   try {
     const debates = await Debate.find();

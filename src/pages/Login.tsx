@@ -21,7 +21,7 @@ function Login() {
 
       alert("✅ Login Successful!");
 
-      setTimeout(() => navigate("/"), 1000); // Redirect after 1 second
+      setTimeout(() => navigate("/"), 1000);
     } catch (error) {
       console.error("❌ Login failed:", error);
       alert(

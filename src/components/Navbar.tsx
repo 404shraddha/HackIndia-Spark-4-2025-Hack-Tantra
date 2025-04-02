@@ -10,9 +10,8 @@ import {
   LogOut,
   Coins,
 } from "lucide-react";
-import axios from "axios"; // ✅ Axios for API call
+import axios from "axios";
 
-// Define the User type
 interface User {
   name: string;
   coins: number;
@@ -23,7 +22,7 @@ interface User {
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null); // ✅ Typing the user state
+  const [user, setUser] = useState<User | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -31,15 +30,14 @@ function Navbar() {
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token);
 
-    // ✅ Fetch profile data if authenticated
     const fetchProfile = async () => {
       if (token) {
         try {
-          const res = await axios.get("http://localhost:5100/user/profile", {
+          const res = await axios.get("http:localhost:5100/user/profile", {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          setUser(res.data); // ✅ Set user data in state
+          setUser(res.data);
         } catch (error) {
           console.error("Failed to fetch profile:", error);
         }
@@ -63,7 +61,6 @@ function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-lg border-b border-white/10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="nav-link group">
               Home
@@ -78,11 +75,9 @@ function Navbar() {
             </Link>
           </div>
 
-          {/* Auth Menu */}
           <div className="hidden md:flex items-center space-x-6">
             {isAuthenticated ? (
               <>
-                {/* ✅ Display profile data */}
                 {user && (
                   <div className="flex items-center space-x-4 text-white">
                     <span className="flex items-center">
@@ -136,7 +131,6 @@ function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu */}
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
@@ -151,7 +145,6 @@ function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu Items */}
         {isMenuOpen && (
           <div className="md:hidden bg-black p-4">
             <Link to="/" className="block py-2">
